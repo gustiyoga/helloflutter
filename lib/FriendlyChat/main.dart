@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helloflutter/FriendlyChat/chat_message.dart';
+import 'package:helloflutter/FriendlyChat/constants/colors.dart' as Constants;
 
 class FriendlychatApp extends StatelessWidget {
   @override
@@ -20,6 +21,9 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = <ChatMessage>[];
   final TextEditingController _textController = new TextEditingController();
+
+  static bool isMessageEmpty = true;
+  static Color sendButton = Constants.SEND_BUTTON_DISABLED;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: TextField(
                 controller: _textController,
                 onSubmitted: _handleSubmitted,
+                onChanged: _handleChanged,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 8.0,
@@ -76,12 +81,25 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.0),
-              child: IconButton(
-                icon: Icon(
-                  Icons.send,
+              margin: EdgeInsets.all(4.0),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  onTap: isMessageEmpty
+                      ? null
+                      : () => _handleSubmitted(_textController.text),
+                  child: Container(
+                    color: Colors.transparent,
+                    height: 40,
+                    width: 40,
+                    child: Icon(
+                      Icons.send,
+                      color: sendButton,
+                      size: 20,
+                    ),
+                  ),
                 ),
-                onPressed: () => _handleSubmitted(_textController.text),
               ),
             )
           ],
@@ -90,14 +108,31 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _handleChanged(String text) {
+    setState(() {
+      sendButton = Constants.SEND_BUTTON_ENABLED;
+      isMessageEmpty = false;
+
+      if (text == "") {
+        sendButton = Constants.SEND_BUTTON_DISABLED;
+        isMessageEmpty = true;
+      }
+    });
+  }
+
   void _handleSubmitted(String text) {
     _textController.clear();
 
     ChatMessage message = new ChatMessage(
       text: text,
     );
+
     setState(() {
-      _messages.insert(0, message);
+      if (message.text != "") {
+        sendButton = Constants.SEND_BUTTON_DISABLED;
+        isMessageEmpty = true;
+        _messages.insert(0, message);
+      }
     });
   }
 }
