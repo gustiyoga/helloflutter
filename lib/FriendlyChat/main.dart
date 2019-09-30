@@ -18,12 +18,19 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final List<ChatMessage> _messages = <ChatMessage>[];
   final TextEditingController _textController = new TextEditingController();
 
   static bool isMessageEmpty = true;
   static Color sendButton = Constants.SEND_BUTTON_DISABLED;
+
+  @override
+  void dispose() {
+    for (ChatMessage message in _messages)
+      message.animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +130,14 @@ class _ChatScreenState extends State<ChatScreen> {
   void _handleSubmitted(String text) {
     _textController.clear();
 
-    ChatMessage message = new ChatMessage(
+    ChatMessage message = ChatMessage(
       text: text,
+      animationController: AnimationController(
+        duration: Duration(
+          milliseconds: 300,
+        ),
+        vsync: this,
+      ),
     );
 
     setState(() {
@@ -134,5 +147,6 @@ class _ChatScreenState extends State<ChatScreen> {
         _messages.insert(0, message);
       }
     });
+    message.animationController.forward();
   }
 }

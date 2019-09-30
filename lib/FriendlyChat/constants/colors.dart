@@ -1,4 +1,4 @@
-library ConstantsColor;
+library constant_colors;
 
 import 'package:flutter/material.dart';
 
